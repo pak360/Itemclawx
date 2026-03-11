@@ -10,7 +10,7 @@ import { existsSync } from 'fs';
 import { constants } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
-import { getOpenClawDir } from './paths';
+import { getOpenClawDir, getResourcesDir } from './paths';
 import { logger } from './logger';
 
 const OPENCLAW_CONFIG_PATH = join(homedir(), '.openclaw', 'openclaw.json');
@@ -137,15 +137,21 @@ export async function getAllSkillConfigs(): Promise<Record<string, SkillEntry>> 
 }
 
 /**
- * Built-in skills bundled with ItemClaw that should be pre-deployed to
- * ~/.openclaw/skills/ on first launch.  These come from the openclaw package's
- * extensions directory and are available in both dev and packaged builds.
+ * Built-in skills from the openclaw package's extensions directory.
  */
 const BUILTIN_SKILLS = [
     { slug: 'feishu-doc',   sourceExtension: 'feishu' },
     { slug: 'feishu-drive', sourceExtension: 'feishu' },
     { slug: 'feishu-perm',  sourceExtension: 'feishu' },
     { slug: 'feishu-wiki',  sourceExtension: 'feishu' },
+] as const;
+
+/**
+ * Custom skills bundled with ItemClawX in resources/skills/<slug>/.
+ * These are proprietary skills not part of the openclaw package.
+ */
+const CUSTOM_BUNDLED_SKILLS = [
+    'unis-ticket',
 ] as const;
 
 /**
@@ -157,12 +163,13 @@ const BUILTIN_SKILLS = [
 export async function ensureBuiltinSkillsInstalled(): Promise<void> {
     const skillsRoot = join(homedir(), '.openclaw', 'skills');
 
+    // Deploy openclaw extension skills
     for (const { slug, sourceExtension } of BUILTIN_SKILLS) {
         const targetDir = join(skillsRoot, slug);
         const targetManifest = join(targetDir, 'SKILL.md');
 
         if (existsSync(targetManifest)) {
-            continue; // already installed
+            continue;
         }
 
         const openclawDir = getOpenClawDir();
@@ -179,6 +186,32 @@ export async function ensureBuiltinSkillsInstalled(): Promise<void> {
             logger.info(`Installed built-in skill: ${slug} -> ${targetDir}`);
         } catch (error) {
             logger.warn(`Failed to install built-in skill ${slug}:`, error);
+        }
+    }
+
+    // Deploy custom bundled skills from resources/skills/
+    const resourcesDir = getResourcesDir();
+    for (const slug of CUSTOM_BUNDLED_SKILLS) {
+        const targetDir = join(skillsRoot, slug);
+        const targetManifest = join(targetDir, 'SKILL.md');
+
+        if (existsSync(targetManifest)) {
+            continue;
+        }
+
+        const sourceDir = join(resourcesDir, 'skills', slug);
+
+        if (!existsSync(join(sourceDir, 'SKILL.md'))) {
+            logger.warn(`Custom bundled skill source not found, skipping: ${sourceDir}`);
+            continue;
+        }
+
+        try {
+            await mkdir(targetDir, { recursive: true });
+            await cp(sourceDir, targetDir, { recursive: true });
+            logger.info(`Installed custom bundled skill: ${slug} -> ${targetDir}`);
+        } catch (error) {
+            logger.warn(`Failed to install custom bundled skill ${slug}:`, error);
         }
     }
 }
