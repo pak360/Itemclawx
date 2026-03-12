@@ -105,12 +105,22 @@ export const useSkillsStore = create<SkillsState>((set, get) => ({
           // Merge with direct config if available
           const directConfig = configResult[s.skillKey] || {};
 
+          // The Gateway's `disabled` flag may not reflect the user's preference
+          // stored in openclaw.json. When the direct config has an explicit
+          // `enabled` value, use it as the source of truth. Skills with no
+          // config entry default to disabled so first-time users start clean.
+          const enabledFromConfig = (directConfig as Record<string, unknown>).enabled;
+          const hasConfigEntry = Object.keys(directConfig).length > 0;
+          const isEnabled = typeof enabledFromConfig === 'boolean'
+            ? enabledFromConfig
+            : hasConfigEntry ? !s.disabled : (s.bundled && s.always ? true : false);
+
           return {
             id: s.skillKey,
             slug: s.slug || s.skillKey,
             name: s.name || s.skillKey,
             description: s.description || '',
-            enabled: !s.disabled,
+            enabled: isEnabled,
             icon: s.emoji || '📦',
             version: s.version || '1.0.0',
             author: s.author,
@@ -239,6 +249,11 @@ export const useSkillsStore = create<SkillsState>((set, get) => ({
     try {
       await useGatewayStore.getState().rpc('skills.update', { skillKey: skillId, enabled: true });
       updateSkill(skillId, { enabled: true });
+      // Persist to openclaw.json so the state survives Gateway restarts
+      hostApiFetch('/api/skills/enabled', {
+        method: 'PUT',
+        body: JSON.stringify({ skillKey: skillId, enabled: true }),
+      }).catch((err) => console.warn('Failed to persist skill enabled state:', err));
     } catch (error) {
       console.error('Failed to enable skill:', error);
       throw error;
@@ -256,6 +271,11 @@ export const useSkillsStore = create<SkillsState>((set, get) => ({
     try {
       await useGatewayStore.getState().rpc('skills.update', { skillKey: skillId, enabled: false });
       updateSkill(skillId, { enabled: false });
+      // Persist to openclaw.json so the state survives Gateway restarts
+      hostApiFetch('/api/skills/enabled', {
+        method: 'PUT',
+        body: JSON.stringify({ skillKey: skillId, enabled: false }),
+      }).catch((err) => console.warn('Failed to persist skill disabled state:', err));
     } catch (error) {
       console.error('Failed to disable skill:', error);
       throw error;

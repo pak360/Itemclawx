@@ -9,7 +9,7 @@ import { saveOAuthTokenToOpenClaw } from './openclaw-auth';
 export type BrowserOAuthProviderType = 'google';
 
 const GOOGLE_RUNTIME_PROVIDER_ID = 'google-gemini-cli';
-const GOOGLE_OAUTH_DEFAULT_MODEL = 'gemini-3-pro-preview';
+const GOOGLE_OAUTH_DEFAULT_MODEL = 'gemini-2.5-flash';
 
 class BrowserOAuthManager extends EventEmitter {
   private activeProvider: BrowserOAuthProviderType | null = null;

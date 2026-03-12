@@ -152,34 +152,7 @@ export function Chat() {
 
               {/* Typing indicator when sending but no stream content yet */}
               {sending && !pendingFinal && !hasAnyStreamContent && (
-                function TypingIndicator() {
-                  const { t } = useTranslation('chat');
-                  const skills = useSkillsStore((s) => s.skills);
-                  const hasEnabledSkills = skills.some((s) => s.enabled && !s.isCore);
-
-                  return (
-                    <div className="flex gap-3">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
-                        <Sparkles className="h-4 w-4" />
-                      </div>
-                      <div className="bg-muted rounded-2xl px-4 py-3">
-                        {hasEnabledSkills ? (
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
-                            <span>{t('typingIndicator.loadingSkills')}</span>
-                          </div>
-                        ) : (
-                          <div className="flex gap-1">
-                            <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                            <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                            <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                }
-
+                <TypingIndicator />
               )}
             </>
           )}

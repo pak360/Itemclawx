@@ -331,6 +331,8 @@ Used in `displayStatusSystemStatus` filter arrays:
 ## Tips
 
 - **First interaction**: When the user sends their first ticket-related question in a session, immediately reply with a brief acknowledgment (e.g., "Let me check the ticket system for you — this may take a moment while I connect and fetch the data.") before making any API calls. This sets expectations for the initial delay caused by authentication and first API round-trip.
+- **Error handling**: If any API call returns an error (non-200 status, `"success": false`, connection refused, timeout, or empty response), **always tell the user clearly** what went wrong. For example: "I wasn't able to reach the ticket system — it may be temporarily unavailable. Please try again in a moment." Never return an empty response or silently swallow errors. If the token appears invalid (`401` or `403`), suggest the user re-configure the Unis Ticket API key in Settings > Skills.
+- **Empty or unexpected responses**: If the API returns successfully but the data is empty or unexpected, let the user know (e.g., "The ticket system returned no results for that query."). Do not return a blank message.
 - **"How many tickets do I have?"** — call `/v1/staff/auth/current` to get the staffId, then POST `/v1/staff/tickets/page` with `{"page": 1, "size": 1, "input": {"staffId": <id>}}` and read the `total` field.
 - **"Show my open tickets"** — filter with `{"staffId": <id>, "displayStatusSystemStatus": [10]}`.
 - **"Show overdue tickets"** — filter with `{"staffId": <id>, "ticketIsOverdue": true}`.

@@ -66,6 +66,30 @@ export async function getSkillConfig(skillKey: string): Promise<SkillEntry | und
 }
 
 /**
+ * Persist the enabled/disabled state for a skill into openclaw.json.
+ * Called when the user toggles a skill in the UI so the preference
+ * survives Gateway restarts.
+ */
+export async function setSkillEnabled(
+    skillKey: string,
+    enabled: boolean,
+): Promise<{ success: boolean; error?: string }> {
+    try {
+        const config = await readConfig();
+        if (!config.skills) config.skills = {};
+        if (!config.skills.entries) config.skills.entries = {};
+        const entry = config.skills.entries[skillKey] || {};
+        entry.enabled = enabled;
+        config.skills.entries[skillKey] = entry;
+        await writeConfig(config);
+        return { success: true };
+    } catch (err) {
+        console.error('Failed to set skill enabled state:', err);
+        return { success: false, error: String(err) };
+    }
+}
+
+/**
  * Update skill config (apiKey and env)
  */
 export async function updateSkillConfig(
@@ -156,13 +180,9 @@ const CUSTOM_BUNDLED_SKILLS = [
 
 /**
  * Skills that should be enabled by default on fresh installs.
- * All other skills will be disabled until the user explicitly enables them.
+ * Empty set = all skills start disabled; the user must explicitly enable them.
  */
-const DEFAULT_ENABLED_SKILLS = new Set([
-    'unis-ticket',
-    'obsidian',
-    '1password',
-]);
+const DEFAULT_ENABLED_SKILLS = new Set<string>([]);
 
 /**
  * Ensure built-in skills are deployed to ~/.openclaw/skills/<slug>/.

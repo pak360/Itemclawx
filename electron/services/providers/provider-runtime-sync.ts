@@ -16,7 +16,7 @@ import {
 import { logger } from '../../utils/logger';
 
 const GOOGLE_OAUTH_RUNTIME_PROVIDER = 'google-gemini-cli';
-const GOOGLE_OAUTH_DEFAULT_MODEL_REF = `${GOOGLE_OAUTH_RUNTIME_PROVIDER}/gemini-3-pro-preview`;
+const GOOGLE_OAUTH_DEFAULT_MODEL_REF = `${GOOGLE_OAUTH_RUNTIME_PROVIDER}/gemini-2.5-flash`;
 
 type RuntimeProviderSyncContext = {
   runtimeProviderKey: string;
