@@ -110,10 +110,6 @@ win:
       to: cli/
   icon: resources/icons/icon.ico
   target:
-    - target: nsis
-      arch:
-        - x64
-        - arm64
     - target: msi
       arch:
         - x64
