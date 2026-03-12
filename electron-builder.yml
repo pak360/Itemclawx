@@ -114,6 +114,9 @@ win:
       arch:
         - x64
         - arm64
+    - target: msi
+      arch:
+        - x64
 
 nsis:
   oneClick: false
