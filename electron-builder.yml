@@ -5,7 +5,7 @@ compression: maximum
 artifactName: ${productName}-${version}-${os}-${arch}.${ext}
 
 directories:
-  output: release
+  output: release2
   buildResources: resources
 
 files:
@@ -32,9 +32,7 @@ extraResources:
 
 afterPack: ./scripts/after-pack.cjs
 
-asar: true
-asarUnpack:
-  - "**/*.node"
+asar: false
 
 # Disable native module rebuilding.
 # The Electron renderer/main process has no native (.node) dependencies.

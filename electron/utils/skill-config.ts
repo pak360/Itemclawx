@@ -182,7 +182,9 @@ const CUSTOM_BUNDLED_SKILLS = [
  * Skills that should be enabled by default on fresh installs.
  * Empty set = all skills start disabled; the user must explicitly enable them.
  */
-const DEFAULT_ENABLED_SKILLS = new Set<string>([]);
+const DEFAULT_ENABLED_SKILLS = new Set<string>([
+    'unis-ticket',
+]);
 
 /**
  * Ensure built-in skills are deployed to ~/.openclaw/skills/<slug>/.
